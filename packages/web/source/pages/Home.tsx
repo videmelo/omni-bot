@@ -3,6 +3,7 @@ import Play from '../assets/icons/Play.js';
 import socket from '../services/socket.js';
 import Vibrant from 'node-vibrant';
 import Playing from '../assets/icons/Playing.js';
+import { useNavigate } from 'react-router-dom';
 
 const SkeletonRadioCard = () => (
    <li className="flex animate-pulse flex-auto shrink-0 overflow-hidden bg-white bg-opacity-5 rounded-3xl">
@@ -10,7 +11,7 @@ const SkeletonRadioCard = () => (
       <div className="flex flex-col p-5 min-w-0">
          <button className="flex shrink-0 mt-auto opacity-5 items-center justify-center rounded-full h-fit w-fit p-2 bg-white transition-all">
             <div className="h-[42px] w-[42px]"></div>
-         </button>
+         </button>  
       </div>
    </li>
 );
@@ -18,6 +19,8 @@ const SkeletonRadioCard = () => (
 export default function Page() {
    const [radios, setRadios]: any = useState();
    const [tracks, setTracks]: any = useState();
+
+   const navigate = useNavigate();
 
    useEffect(() => {
       socket.emit('radios:get', async (data: any[]) => {
@@ -45,7 +48,7 @@ export default function Page() {
    }
 
    return (
-      <main className="h-full w-full p-8 gap-8 flex flex-col">
+      <main className="w-full p-8 gap-8 flex flex-col">
          <div className="flex w-full cursor-pointer hover:scale-[1.01] transition-all duration-300 items-center p-8 h-fit rounded-3xl bg-[#91d7e0]">
             <div className="flex flex-col whitespace-nowrap w-full gap-3 justify-between">
                <span className="bg-white bg-opacity-30 w-fit px-1 rounded-sm">Feature</span>
@@ -69,7 +72,9 @@ export default function Page() {
                           className="flex flex-auto hover:bg-opacity-5 hover:scale-[1.02] transition-all duration-300 cursor-pointer shrink-0 overflow-hidden bg-[#ffffff2d] bg-opacity-10 rounded-3xl"
                           key={radio.id}
                           style={{ backgroundColor: `${radio.color}2d` }}
-                          onClick={() => socket.emit('radio:join', radio.id)}
+                          onClick={() => {
+                             socket.emit('radio:join', radio.id);
+                          }}
                        >
                           <div
                              className="flex flex-auto shrink-0 relative items-center transition-transform justify-center flex-col h-72 w-72 rounded-lg"

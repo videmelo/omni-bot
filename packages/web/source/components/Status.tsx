@@ -182,7 +182,7 @@ function Status({ status, styles = '', visible = '', hidden = '' }: StatusProps)
    };
 
    return (
-      <div className={`${styles} items-center flex flex-col-reverse gap-2`}>
+      <div className={`${styles} items-center flex flex-col gap-2`}>
          {queue.map((item) => (
             <div
                key={item.id}

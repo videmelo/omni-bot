@@ -17,7 +17,7 @@ export default function Page() {
       setStatus({
          type: 'error',
          message: 'Error while authenticating with Discord, please try again later!',
-      });
+      });  
    }
 
    const navigate = useNavigate();

@@ -102,12 +102,14 @@ function Player() {
    function updatePlayer() {
       socket.emit('queue:get', (data: any) => {
          if (!data) return dispatch({ type: 'RESET' });
+         console.log(data)
 
          dispatch({ type: 'SET_QUEUE', payload: data.list });
          dispatch({ type: 'SET_TRACK', payload: { ...data.current, duration: data.current?.duration || 0 } });
          dispatch({ type: 'SET_COVER', payload: data.current?.icon });
          dispatch({ type: 'SET_REPEAT', payload: data.repeat });
          dispatch({ type: 'SET_SHUFFLED', payload: data.shuffled });
+         dispatch({ type: 'SET_NEXT', payload: data.next })
 
          handlePalette(data.current?.icon);
       });
@@ -226,7 +228,7 @@ function Player() {
                      }}
                      onCommit={(value: any) => {
                         dispatch({ type: 'SET_TIMER', payload: value.time });
-                        socket.emit('player:seek', value.time);
+                        socket.emit('player:seek', value.time * 1000);
                      }}
                   />
                </div>
@@ -309,8 +311,8 @@ function Player() {
                         onClick={() => handleItemClick(item)}
                      >
                         <img src={item.icon} className="h-[50px] w-[50px] rounded-md" />
-                        <div className="w-full">
-                           <div className="font-medium text-sm font-poppins text-white w-1/2 truncate">{item.name}</div>
+                        <div className="w-full min-w-0">
+                           <div className="font-medium text-sm font-poppins w-full text-white truncate">{item.name}</div>
                            <div className="font-normal text-xs font-poppins text-[#B3B3B3]">{item.artist.name}</div>
                         </div>
                      </div>

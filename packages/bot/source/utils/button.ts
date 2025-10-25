@@ -1,15 +1,5 @@
-import {
-   ButtonBuilder,
-   ActionRowBuilder,
-   StringSelectMenuBuilder,
-   ComponentType,
-   ButtonStyle,
-   Interaction,
-   Message,
-   MessagePayload,
-   EmbedBuilder,
-} from 'discord.js';
-import { InteractionContext } from '../modules/Interactions.js';
+import { ButtonBuilder, ActionRowBuilder, StringSelectMenuBuilder, ComponentType, ButtonStyle, Interaction, Message, MessagePayload, EmbedBuilder } from 'discord.js';
+import { InteractionContext } from '../core/loaders/Interactions.js';
 
 interface ButtonOptions {
    style?: keyof typeof ButtonStyle | ButtonStyle | string;
@@ -40,14 +30,7 @@ interface PaginationOptions {
 }
 
 export default class Buttons {
-   new({
-      style = 'Primary',
-      label,
-      id,
-      url,
-      emoji,
-      disabled = false,
-   }: ButtonOptions): ButtonBuilder {
+   new({ style = 'Primary', label, id, url, emoji, disabled = false }: ButtonOptions): ButtonBuilder {
       const button = new ButtonBuilder();
 
       if (id) button.setCustomId(id);

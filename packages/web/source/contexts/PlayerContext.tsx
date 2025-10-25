@@ -7,6 +7,7 @@ interface Track {
    album?: { name: string };
    artist: { name: string };
    icon: string;
+   metadata: any;
 }
 
 interface Palette {
@@ -18,6 +19,7 @@ type RepeatMode = 'off' | 'track' | 'queue';
 
 interface PlayerState {
    queue: Track[];
+   next: Track | null;
    track: Track | null;
    cover: string | null;
    palette: Palette | null;
@@ -33,6 +35,7 @@ interface PlayerState {
 const initialState: PlayerState = {
    queue: [],
    track: null,
+   next: null,
    cover: null,
    palette: null,
    timer: 0,
@@ -47,6 +50,7 @@ const initialState: PlayerState = {
 type PlayerAction =
    | { type: 'SET_QUEUE'; payload: Track[] }
    | { type: 'SET_TRACK'; payload: Track | null }
+   | { type: 'SET_NEXT'; payload: Track | null }
    | { type: 'SET_COVER'; payload: string | null }
    | { type: 'SET_PALETTE'; payload: Palette | null }
    | { type: 'SET_TIMER'; payload: number }
@@ -64,6 +68,8 @@ function playerReducer(state: PlayerState, action: PlayerAction): PlayerState {
          return { ...state, queue: action.payload };
       case 'SET_TRACK':
          return { ...state, track: action.payload };
+      case 'SET_NEXT':
+         return { ...state, next: action.payload };
       case 'SET_COVER':
          return { ...state, cover: action.payload };
       case 'SET_PALETTE':

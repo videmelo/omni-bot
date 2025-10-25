@@ -21,7 +21,7 @@ type AuthType = 'login' | 'invite';
 interface AuthParams {
    authUrl: string;
    clientId: string;
-   redirectUri: string;
+   redirectUri: string;  
    scopes: string[];
    guildId?: string;
    state?: string;

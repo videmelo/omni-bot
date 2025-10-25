@@ -33,7 +33,7 @@ export default function Header() {
             <span className="block h-4 rounded-sm border border-white border-opacity-50 bottom-0 opacity-40" />
             <input
                type="text"
-               placeholder="Songs, lyrics, artists..."
+               placeholder="Search"
                className="bg-transparent text-base text-white text-opacity-50 outline-none placeholder:text-base placeholder:text-[#ffffff54] placeholder:text-opacity-80"
                autoComplete="off"
                autoCorrect="off"
