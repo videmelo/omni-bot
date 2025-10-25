@@ -2,20 +2,16 @@ import 'dotenv/config';
 
 import { Client, Collection, GatewayIntentBits, VoiceBasedChannel, TextBasedChannel } from 'discord.js';
 
-import Interactions from '../loaders/Interactions.js';
-import Events from '../loaders/Events.js';
+import Interactions from './loaders/Interactions.js';
+import Events from './loaders/Events.js';
 import fs from 'node:fs/promises';
 
 import { api, io, server } from '../api/index.js';
 import logger from '../utils/logger.js';
 import Verify from '../utils/errors.js';
-import Player from '../player/Player.js';
-import Search from '../services/Search.js';
+import { Player, Radio, Track, Search, RadioPlaylist } from '../modules/music/index.js';
 import Embed from '../utils/embed.js';
 import Button from '../utils/button.js';
-import Radio from '../player/Radio.js';
-import { RadioPlaylist } from '../services/Deezer.js';
-import { Track } from '../models/Track.js';
 import RegisterSocketHandlers from '../api/sockets/index.js';
 
 export default class Bot extends Client {

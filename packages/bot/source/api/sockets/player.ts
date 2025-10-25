@@ -1,5 +1,5 @@
 import logger from '../../utils/logger.js';
-import { Track } from '../../models/Track.js';
+import { Track } from '../../modules/music/models/Track.js';
 import { isBoolean } from 'node:util';
 
 import RateLimit from './middlewares/ratelimit.js';
