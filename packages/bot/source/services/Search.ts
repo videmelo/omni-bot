@@ -1,16 +1,11 @@
 import { Collection } from 'discord.js';
-import Bot from '../core/Bot.js';
-import { Playlist, Track } from './Media.js';
+import { Track } from '../models/Track.js';
+import { Playlist } from '../models/Playlist.js';
 import Spotify from './Spotify.js';
 import YouTube from './Youtube.js';
 import Deezer from './Deezer.js';
 
 type SearchType = 'track' | 'top' | 'url';
-
-interface SearchOptions {
-   type?: SearchType;
-   limit?: number;
-}
 
 interface SearchResult {
    type: 'track' | 'album' | 'playlist' | 'artist' | 'search' | 'top';
@@ -23,25 +18,34 @@ interface SearchResult {
    };
 }
 
+interface SearchOptions {
+   spotify: { id: string; secret: string };
+   youtube?: { cookies: string };
+   engine?: 'spotify' | 'deezer';
+}
+
 export default class Search {
    public spotify: Spotify;
    public youtube: YouTube;
-   public deezer;
-   private client: Bot;
+   public deezer: Deezer;
    public cache: Collection<string, SearchResult>;
-   constructor(client: Bot) {
+   public engine: Spotify | Deezer;
+
+   constructor({ spotify, youtube, engine = 'spotify' }: SearchOptions) {
       this.spotify = new Spotify({
-         id: client.config.spotify.id,
-         secret: client.config.spotify.secret,
+         id: spotify.id,
+         secret: spotify.secret,
       });
 
-      this.youtube = new YouTube();
       this.deezer = new Deezer();
-      this.client = client;
+
+      this.youtube = new YouTube(youtube?.cookies);
       this.cache = new Collection();
+
+      this.engine = engine == 'deezer' ? this.deezer : this.spotify;
    }
 
-   async resolve(query: string, options: SearchOptions = { limit: 5 }): Promise<SearchResult | undefined> {
+   async resolve(query: string, options: { type?: SearchType; limit?: number } = { limit: 5 }): Promise<SearchResult | undefined> {
       options.type ??= this.idealSearchType(query);
       if (!options.type) return;
 
@@ -117,8 +121,12 @@ export default class Search {
    }
 
    getcache(id: string) {
-      const flattened = Array.from(this.cache.values()).flatMap((res) => [...(res.items.tracks ?? [])]) as Track[];
-      return flattened.find((item) => item.id == id || item.key == id);
+      for (const data of this.cache.values()) {
+         if (data.items.tracks) {
+            const track = data.items.tracks.find((track) => track.id === id);
+            if (track) return track;
+         }
+      }
    }
 
    idealSearchType(query: string): SearchType | undefined {

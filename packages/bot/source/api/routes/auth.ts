@@ -1,9 +1,9 @@
 import { Router, Request, Response } from 'express';
 import axios from 'axios';
 
-const route = Router();
+const auth = Router();
 
-route.get('/auth', async (req, res) => {
+auth.get('/auth', async (req, res) => {
    const code = req.query.code as string | undefined;
    const state = req.query.state as string | undefined;
    
@@ -32,7 +32,6 @@ route.get('/auth', async (req, res) => {
          state: state,
       });
    } catch (error: any) {
-      console.error(error);
       res.status(500).json({
          error: true,
          message: error.message,
@@ -40,4 +39,4 @@ route.get('/auth', async (req, res) => {
    }
 });
 
-export default route;
+export default auth

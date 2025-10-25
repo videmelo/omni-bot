@@ -1,6 +1,6 @@
 import Bot from '../../core/Bot.js';
-import { InteractionContext } from '../../modules/Interactions.js';
-import Interaction from '../../handlers/Interaction.js';
+import { InteractionContext } from '../../loaders/Interactions.js';
+import Interaction from '../../base/Interaction.js';
 import { AutocompleteInteraction } from 'discord.js';
 
 export default class Help extends Interaction {

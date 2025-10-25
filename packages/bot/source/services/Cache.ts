@@ -14,17 +14,18 @@
 
 import fs from 'node:fs/promises';
 import Stream from 'stream';
-import { Track } from './Media.js';
+import { Track } from '../models/Track.js';
 import { AttachmentBuilder, TextChannel } from 'discord.js';
 
 import Bot from '../core/Bot.js';
 import logger from '../utils/logger.js';
 
 interface CachedTrack {
-   id: string;
-   encoded: string;
-   key: string;
-   message: string;
+   id: string; // source id
+   encoded: string; // encoded track
+   key: string; // encoded query
+   message: string; // message id
+   stream: string; // youtube id
 }
 
 export default class Cache {
@@ -57,7 +58,7 @@ export default class Cache {
          files: [attachment],
       });
 
-      const encoded = Buffer.from(JSON.stringify({ ...track, source: 'cache' })).toString('base64');
+      const encoded = Buffer.from(JSON.stringify({ ...track })).toString('base64');
 
       try {
          const file = 'tracks.json';
@@ -72,6 +73,7 @@ export default class Cache {
             key: track.key!,
             encoded: encoded,
             message: message.id,
+            stream: track.metadata!.id,
          });
 
          await fs.writeFile(file, JSON.stringify(json, null, 2), 'utf8');
@@ -84,7 +86,7 @@ export default class Cache {
       try {
          const data = await fs.readFile('tracks.json', 'utf8');
          const tracks: CachedTrack[] = JSON.parse(data);
-         const cached = tracks.find((item) => item.id === track.id || item.key === track.key);
+         const cached = tracks.find((item) => item.id === track.id || item.key === track.key || item.stream === track.metadata?.id);
          if (!cached) return;
 
          const channel = (await this.client.channels.fetch(this.channel)) as TextChannel;

@@ -1,5 +1,6 @@
 import { Collection } from 'discord.js';
-import { Track, Playlist } from './Media.js';
+import { Track } from '../models/Track.js';
+import { Playlist } from '../models/Playlist.js';
 import Bot from '../core/Bot.js';
 
 import * as Discord from 'discord.js';
@@ -65,19 +66,17 @@ export default class Radio extends Playback {
    }
 
    public socket() {
-      const connections = this.connections.map((con) => con.voice.guild.id)
+      const connections = this.connections.map((con) => con.voice.guild.id);
       this.client.socket.to(connections).emit('player:update');
    }
 
-   public async connect(guild: string, channel: string): Promise<void> {
+   public async connect(guild: string, channel: string) {
       if (!this.audioplayer) return;
       const playback = this.client.getGuildPlayback(guild);
       if (playback) {
          if (playback.isRadio()) {
             if (playback.id === this.id) {
-               const existing = playback.connections.get(this.id)!;
-               existing.subscribe(playback.audioplayer!);
-               return;
+               return this;
             } else {
                playback.connections.get(guild)?.destroy();
                playback.connections.delete(guild);
@@ -115,7 +114,7 @@ export default class Radio extends Playback {
 
          logger.info(`[Radio: ${this.name}] Connected to guild ${guild} in channel ${channel}.`);
          this.socket();
-         return;
+         return this;
       } catch (error: any) {
          logger.error(`[Radio: ${this.name}] Failed to connect to guild ${guild}: ${error.message}`);
          return;

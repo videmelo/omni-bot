@@ -1,4 +1,3 @@
-import logger from '../../../utils/logger.js';
 import { SocketData } from '../index.js';
 
 type RequestName = string;

@@ -1,5 +1,6 @@
 import SpotifyWebApi from 'spotify-web-api-node';
 import Logger from '../utils/logger.js';
+import axios from 'axios';
 
 interface SpotifyConfig {
    id: string;
@@ -28,10 +29,11 @@ interface SpotifyTrack {
    icon?: string;
    query?: string;
    album: SpotifyAlbum;
+   popularity: number;
 }
 
 interface SpotifyAlbum {
-   type?: 'album';
+   type: 'album';
    id: string;
    name: string;
    artists?: Array<{ name: string; id: string }>;
@@ -55,7 +57,7 @@ interface SpotifyPlaylist {
 }
 
 interface SpotifyArtist {
-   type?: 'artist';
+   type: 'artist';
    id: string;
    name: string;
    icon?: string;
@@ -142,9 +144,7 @@ export default class Spotify {
          return {
             type: options.types.length > 1 ? 'search' : options.types[0],
             items: {
-               tracks:
-                  result.body.tracks.items.filter((track) => (track.album.album_type == 'single' ? null : track)).map((track) => this.build(track)) ||
-                  [],
+               tracks: result.body.tracks.items.filter((track) => (track.album.album_type == 'single' ? null : track)).map((track) => this.build(track)) || [],
                artists:
                   result.body.artists?.items
                      .filter((artist) => artist.images?.[0]?.url)
@@ -229,12 +229,10 @@ export default class Spotify {
 
       if (total > 100) {
          for (let offset = 100; offset < total; offset += 100) {
-            const tracksPage = await this.request(() => this.api.getPlaylistTracks(id, { offset, limit: 100 }).then((res) => res.body.items)).catch(
-               (error: any) => {
-                  Logger.error('Failed to fetch playlist tracks:', error);
-                  return [];
-               }
-            );
+            const tracksPage = await this.request(() => this.api.getPlaylistTracks(id, { offset, limit: 100 }).then((res) => res.body.items)).catch((error: any) => {
+               Logger.error('Failed to fetch playlist tracks:', error);
+               return [];
+            });
 
             items.push(...tracksPage);
          }
@@ -253,12 +251,12 @@ export default class Spotify {
       };
    }
 
-   async getTrack(id: string): Promise<SpotifyTrack | undefined> {
+   async getTrack(id: string): Promise<SpotifyTrack> {
       const track = await this.request(() => this.api.getTrack(id).then((track) => track.body));
       return this.build(track);
    }
 
-   async getAlbum(id: string): Promise<SpotifyAlbum | undefined> {
+   async getAlbum(id: string): Promise<SpotifyAlbum> {
       const album = await this.request(() => this.api.getAlbum(id).then((album) => album.body));
 
       return {
@@ -270,7 +268,21 @@ export default class Spotify {
          url: album.external_urls.spotify,
          total: album.tracks.total,
          tracks: album.tracks.items,
+         popularity: album.popularity,
       };
+   }
+
+   async getRelated(track: any) {
+      const related = await axios.get('https://ws.audioscrobbler.com/2.0/', {
+         params: {
+            method: 'track.getSimilar',
+            artist: track.artist.name,
+            track: track.name,
+            api_key: 'ce49f501a7fc72f53ad8a9b0e3bfd86c',
+            format: 'json',
+         },
+      });
+      console.log(related);
    }
 
    async getTopResults(query: string) {
@@ -294,20 +306,23 @@ export default class Spotify {
       });
       if (!tracks || !albums || !artists) return null;
 
-      type ItemType = 'album' | 'artist' | 'track';
-      const priority: Record<ItemType, number> = {
-         album: 1.3,
-         artist: 1.1,
-         track: 1.2,
-      };
-      let mathes: { name: string; type: ItemType; popularity: number }[] = [];
-      let result = [tracks[0], albums[0], artists[0]] as {
+      type MatchType = 'album' | 'artist' | 'track';
+      interface MatchItem {
+         type: MatchType;
          name: string;
-         type: ItemType;
          popularity: number;
-      }[];
+      }
+
+      const priority: Record<MatchType, number> = {
+         album: 1.25,
+         artist: 1.2,
+         track: 1.15,
+      };
+      let mathes: MatchItem[] = [];
+      let result: MatchItem[] = [tracks[0], { ...albums[0], popularity: albums[0]?.popularity ?? 0 }, { ...artists[0], popularity: artists[0]?.popularity ?? 0 }];
+
       result = result.map((item) => {
-         if (item?.name.toLowerCase().includes(query.toLowerCase())) mathes.push(item);
+         if (item?.name.toLowerCase().match(query.toLowerCase())) mathes.push(item);
          return item;
       });
 
@@ -335,6 +350,7 @@ export default class Spotify {
          name: track.name,
          url: track.external_urls.spotify,
          artist: {
+            type: 'artist',
             name: track.artists[0].name,
             id: track.artists[0].id,
             url: track.artists[0].external_urls.spotify,
@@ -342,12 +358,14 @@ export default class Spotify {
          duration: track.duration_ms,
          icon: track?.album?.images[0]?.url || undefined,
          album: {
+            type: 'album',
             name: track.album.name,
             id: track.album.id,
             url: track.album.external_urls.spotify,
             icon: track.album.images[0]?.url,
             total: track.album.total_tracks,
          },
+         popularity: track.popularity,
       };
    }
 }

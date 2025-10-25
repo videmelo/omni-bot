@@ -1,12 +1,12 @@
 import logger from '../../utils/logger.js';
-import { Track } from '../../handlers/Media.js';
+import { Track } from '../../models/Track.js';
 import { isBoolean } from 'node:util';
 
-import client from '../../index.js';
 import RateLimit from './middlewares/ratelimit.js';
 import { SocketData } from './index.js';
+import Bot from '../../core/Bot.js';
 
-export default function PlayerSocket(socket: SocketData) {
+export default function PlayerSocket(socket: SocketData, client: Bot) {
    const middleware = {
       ignore: ['player:get'],
       custom: {
@@ -26,7 +26,7 @@ export default function PlayerSocket(socket: SocketData) {
       }
 
       if (!socket.guild || !socket?.voice) {
-         const error = { status: 404, message: 'userNotInVoice' };
+         const error = { status: 403, message: 'userNotInVoice' };
          socket.emit('status', { type: 'error', ...error });
          return { error };
       }
@@ -37,12 +37,12 @@ export default function PlayerSocket(socket: SocketData) {
       let player = client.getGuildPlayback(socket.guild);
       if (player) {
          if (player.isRadio()) {
-            const error = { status: 500, message: 'isRadio' };
+            const error = { status: 403, message: 'isRadio' };
             socket.emit('status', { type: 'error', ...error });
             return { error };
          }
       }
-      
+
       if (!player) {
          const playback = await client.initGuildPlayer(voice);
          if (playback) {
@@ -70,7 +70,7 @@ export default function PlayerSocket(socket: SocketData) {
       return { player, voice, requester };
    }
 
-   socket.on('queue:get', (callback?: (data?: any) => void) => {
+   socket.on('queue:get', async (callback?: (data?: any) => void) => {
       if (!socket.guild || !socket.voice) return callback?.(undefined);
       const player = client.getGuildPlayback(socket.guild);
       if (!player) return callback?.(undefined);
@@ -78,7 +78,10 @@ export default function PlayerSocket(socket: SocketData) {
       logger.info(`user: ${socket.user} with ${socket.id} queue:get, in guild: ${socket.guild}`);
       callback?.({
          list: player.queue.tracks,
-         current: player.current,
+         current: {
+            ...player.current,
+            video: await client.search.youtube.getVideo(player.current!),
+         },
          next: player.queue.next(),
          repeat: player.queue.repeat,
          shuffled: player.queue.shuffled,
@@ -100,45 +103,6 @@ export default function PlayerSocket(socket: SocketData) {
          paused: player.paused,
          volume: player.volume,
       });
-   });
-
-   socket.on('radio:join', async (id: string) => {
-      if (!socket?.user) {
-         const error = { status: 404, message: 'userNotFound' };
-         socket.emit('status', { type: 'error', ...error });
-         return { error };
-      }
-
-      if (!socket.guild || !socket?.voice) {
-         const error = { status: 404, message: 'userNotInVoice' };
-         socket.emit('status', { type: 'error', ...error });
-         return { error };
-      }
-
-      const voice = await client.channels.fetch(socket.voice);
-      if (!voice?.isVoiceBased()) return;
-
-      const radio = client.radios.get(id);
-      radio?.connect(voice.guild.id, voice.id);
-   });
-
-   socket.on('radios:get', async (callback?: (data?: any) => void) => {
-      callback?.(
-         client.radios.map((radio) => {
-            const session = radio.getTimeSession();
-            return {
-               id: radio.id,
-               name: radio.name,
-               genre: radio.genre,
-               connections: radio.connections.map((con) => con.voice.id),
-               position: session?.position,
-               queue: {
-                  tracks: radio.queue.tracks,
-                  current: session?.current,
-               },
-            };
-         })
-      );
    });
 
    socket.on('search:top', async (query: string, callback?: (result: any) => void) => {

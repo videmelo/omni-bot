@@ -1,7 +1,7 @@
 import { AutocompleteInteraction } from 'discord.js';
 import Bot from '../../core/Bot.js';
-import Interaction from '../../handlers/Interaction.js';
-import { InteractionContext } from '../../modules/Interactions.js';
+import Interaction from '../../base/Interaction.js';
+import { InteractionContext } from '../../loaders/Interactions.js';
 
 export default class Radio extends Interaction {
    constructor() {

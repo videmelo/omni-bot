@@ -1,7 +1,7 @@
 import { AutocompleteInteraction, BaseInteraction, ChatInputCommandInteraction } from 'discord.js';
 import Bot from '../../core/Bot.js';
 
-import Event from '../../handlers/Event.js';
+import Event from '../../base/Event.js';
 import logger from '../../utils/logger.js';
 
 export default class InteractionCreate extends Event {

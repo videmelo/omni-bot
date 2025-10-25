@@ -1,5 +1,5 @@
 import Bot from '../core/Bot.js';
-import { Track } from './Media.js';
+import { Track } from '../models/Track.js';
 
 import * as Discord from 'discord.js';
 import * as Voice from '@discordjs/voice';
@@ -34,8 +34,12 @@ export default class Player extends Playback {
 
    public async connect(channel: string) {
       try {
-         const voice = (await this.client.channels.fetch(channel)) as Discord.VoiceBasedChannel;
-         if (!voice) throw new Error('Invalid VoiceChannel');
+         const voice = await this.client.channels.fetch(channel);
+         if (!voice?.isVoiceBased()) throw new Error('Invalid VoiceChannel');
+
+         const existing = this.client.getGuildPlayback(voice.id);
+         if (existing?.isRadio()) existing.connections.get(voice.id)?.destroy();
+         else if (existing?.isPlayer()) if (existing.connection) existing.destroy();
 
          this.connection = Voice.joinVoiceChannel({
             channelId: voice.id,
@@ -85,7 +89,7 @@ export default class Player extends Playback {
    public destroy() {
       if (!this.connection) return;
       this.connection.destroy();
-      this.client.players.delete(this.guild)
+      this.client.players.delete(this.guild);
    }
 
    public async play(
@@ -95,6 +99,7 @@ export default class Player extends Playback {
          force: false,
       }
    ): Promise<Track | undefined> {
+      this.client.search.deezer.search(`${track.artist.name} ${track.name}`);
       try {
          if (!(track instanceof Track)) throw new Error('Track is not a Track!');
          if (!this.audioplayer || !this.connection) throw new Error('Player not initied');

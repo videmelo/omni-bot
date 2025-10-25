@@ -2,7 +2,7 @@ import { ChildProcess } from 'child_process';
 import ytex from 'youtube-dl-exec';
 import ytsr from 'youtube-sr';
 import ytdl from '@distube/ytdl-core';
-import { TrackMetadata } from './Media.js';
+import { Track, TrackMetadata } from '../models/Track.js';
 
 export default class YouTube {
    urls: {
@@ -15,7 +15,7 @@ export default class YouTube {
    private activeCount = 0;
    private queue: (() => void)[] = [];
 
-   constructor() {
+   constructor(cookies?: string) {
       this.urls = {
          pattern: /((?:https?:)?\/\/)?((?:www|m|music)\.)?((?:youtube\.com|youtu\.be))\/(watch\?v=(.+)&list=|(playlist)\?list=|watch\?v=)?([^&]+)/,
          playlist: /^((?:https?:)?\/\/)?((?:www|m|music)\.)?((?:youtube\.com|youtu.be)?)\/(((watch\?v=)?(.+)(&|\?))?list=|(playlist)\?list=)([^&]+)/,
@@ -26,21 +26,14 @@ export default class YouTube {
    async search(query: string) {
       console.log(`Searching YouTube for: ${query}`);
       const result = (await ytsr.YouTube.search(query, { limit: 1, type: 'video' }))[0];
-      return {
-         id: result.id,
-         source: 'youtube',
-         url: result.url,
-         name: result.title,
-         duration: result.duration,
-         explicit: result.nsfw,
-         icon: result.thumbnail?.url,
-         artist: {
-            name: result.channel?.name,
-            id: result.channel?.id,
-            url: result.channel?.url,
-            icon: result.channel?.icon,
-         },
-      } as TrackMetadata;
+      return this.build(result);
+   }
+
+   async getVideo(track: Track) {
+      if (!track) return;
+      // return track.metadata;
+      if (track.metadata?.name.match(/\b(video|visualiz|official)\b\)/i)) return track;
+      else return;
    }
 
    private async enqueue<T>(task: () => Promise<T>): Promise<T> {
@@ -92,6 +85,7 @@ export default class YouTube {
    }
 
    #getAudioStream(url: string): NodeJS.ReadableStream {
+      console.log('Serach FallBack!');
       const subprocess: ChildProcess = ytex.exec(
          url,
          {
@@ -102,7 +96,7 @@ export default class YouTube {
             quiet: true,
             noWarnings: true,
             preferFreeFormats: true,
-            cookies: "C:/Users/vinic/Downloads/www.youtube.com_cookies.txt"
+            cookies: 'C:/Users/vinic/Downloads/www.youtube.com_cookies.txt',
          },
          { stdio: ['ignore', 'pipe', 'pipe'] }
       );
@@ -158,5 +152,23 @@ export default class YouTube {
             else reject(new Error(`youtube‑dl exited with code ${code}`));
          });
       });
+   }
+
+   build(video: ytsr.Video): TrackMetadata {
+      return {
+         id: video.id!,
+         source: 'youtube',
+         url: video.url,
+         name: video.title!,
+         duration: video.duration,
+         explicit: video.nsfw,
+         icon: video.thumbnail?.url,
+         artist: {
+            name: video.channel?.name!,
+            id: video.channel?.id!,
+            url: video.channel?.url,
+            icon: video.channel?.icon.url,
+         },
+      };
    }
 }

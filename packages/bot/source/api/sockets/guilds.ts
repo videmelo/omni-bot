@@ -2,9 +2,9 @@ import { GuildMember, VoiceChannel } from 'discord.js';
 import { SocketData } from './index.js';
 
 import logger from '../../utils/logger.js';
-import client from '../../index.js';
+import Bot from '../../core/Bot.js';
 
-export default function GuildSocket(socket: SocketData) {
+export default function GuildSocket(socket: SocketData, client: Bot) {
    socket.on('disconnect', () => {
       if (socket?.guild) {
          logger.info(`disconnect: ${socket.guild}, user: ${socket.user} with ${socket.id}`);
@@ -106,4 +106,4 @@ export default function GuildSocket(socket: SocketData) {
 
       if (typeof callback === 'function') return callback();
    });
-};
+}

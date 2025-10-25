@@ -8,7 +8,7 @@ export interface Track {
    id: string;
    url: string;
    key?: string;
-   source: 'spotify' | 'youtube' | 'deezer' | 'cache';
+   source: 'spotify' | 'youtube' | 'deezer';
    index?: number;
    ogidx?: number;
    requester?: string | null;
@@ -34,7 +34,7 @@ export interface TrackMetadata {
    artist: TrackArtist;
 }
 
-interface TrackArtist {
+export interface TrackArtist {
    name: string;
    id: string;
    url?: string;
@@ -42,23 +42,7 @@ interface TrackArtist {
 }
 
 export class Track implements Track {
-   constructor({
-      source,
-      id,
-      name,
-      artist,
-      icon,
-      explicit = false,
-      duration,
-      streamable,
-      url,
-      index,
-      ogidx,
-      requester,
-      cached = false,
-      metadata,
-      album,
-   }: Track) {
+   constructor({ source, id, name, artist, icon, explicit = false, duration, streamable, url, index, ogidx, requester, cached = false, metadata, album }: Track) {
       this.type = 'track';
       this.name = name;
       this.url = url;
@@ -115,19 +99,5 @@ export class TrackMetadata implements TrackMetadata {
          url: artist.url,
          icon: artist.icon,
       };
-   }
-}
-
-export class Playlist {
-   public id: string;
-   public name: string;
-   public description: string | null;
-   public tracks: Track[];
-
-   constructor({ id, name, description, tracks }: { id: string; name: string; description: string | null; tracks: Track[] }) {
-      this.id = id;
-      this.name = name;
-      this.description = description;
-      this.tracks = tracks;
    }
 }

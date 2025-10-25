@@ -1,8 +1,8 @@
 import Bot from '../../core/Bot.js';
-import { InteractionContext } from '../../modules/Interactions.js';
-import Interaction from '../../handlers/Interaction.js';
+import { InteractionContext } from '../../loaders/Interactions.js';
+import Interaction from '../../base/Interaction.js';
 import { AutocompleteInteraction } from 'discord.js';
-import { Track } from '../../handlers/Media.js';
+import { Track } from '../../models/Track.js';
 
 export default class Play extends Interaction {
    constructor() {
@@ -29,10 +29,7 @@ export default class Play extends Interaction {
          if (!search?.items.tracks) return await context.respond([]);
          const tracks = search.items.tracks.map((track: any) => {
             const { artist, name } = track;
-            const item =
-               `${name} - ${artist.name}`.length > 100
-                  ? `${name.slice(0, 100 - artist.name.length - 6)}... - ${artist.name}`
-                  : `${name} - ${artist.name}`;
+            const item = `${name} - ${artist.name}`.length > 100 ? `${name.slice(0, 100 - artist.name.length - 6)}... - ${artist.name}` : `${name} - ${artist.name}`;
             return { name: item, value: item };
          });
 
@@ -71,6 +68,7 @@ export default class Play extends Interaction {
                   context.replyErro('An error occurred while playing the track!');
                });
                if (!track) return await context.replyErro('An error occurred while playing the track! Try latter.');
+               break;
             }
             case 'playlist': {
                if (!search.items.playlists!.length) return context.replyErro('This Playlist is empty!');
@@ -80,6 +78,7 @@ export default class Play extends Interaction {
                   context.replyErro('An error occurred while playing the track!');
                });
                if (!played) return await context.replyErro('An error occurred while playing the track! Try latter.');
+               break;
             }
          }
 

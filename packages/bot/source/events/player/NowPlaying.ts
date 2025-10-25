@@ -1,9 +1,9 @@
 import Bot from '../../core/Bot.js';
-import { Track } from '../../handlers/Media.js';
-import Queue from '../../handlers/Queue.js';
+import { Track } from '../../models/Track.js';
+import Queue from '../../player/Queue.js';
 
-import Event from '../../handlers/Event.js';
-import Player from '../../handlers/Player.js';
+import Event from '../../base/Event.js';
+import Player from '../../player/Player.js';
 import logger from '../../utils/logger.js';
 
 export default class NowPlaying extends Event {

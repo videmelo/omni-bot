@@ -1,7 +1,7 @@
 import { AutocompleteInteraction } from 'discord.js';
-import type { InteractionContext } from '../modules/Interactions.js';
-import Player from '../handlers/Player.js';
-import Radio from '../handlers/Radio.js';
+import type { InteractionContext } from '../loaders/Interactions.js';
+import Player from '../player/Player.js';
+import Radio from '../player/Radio.js';
 
 type ErrorType = 'userNotInVoice' | 'botNotInVoice' | 'alreadyInVoice' | 'inSameVoice' | 'emptyQueue' | 'notPlaying' | 'isRadio';
 

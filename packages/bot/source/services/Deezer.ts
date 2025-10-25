@@ -1,7 +1,5 @@
 import { Client as DeezerApi, Track as DeezerTrack } from 'deezer-ts';
-import fs from 'node:fs/promises';
-import Logger from '../utils/logger.js';
-import { Track } from './Media.js';
+import { Track } from '../models/Track.js';
 
 export interface RadioPlaylist {
    genre: {
@@ -24,6 +22,34 @@ export default class Deezer {
       this.api = new DeezerApi({ headers: 'Accept-Language: en' });
    }
 
+   async search(query: string) {
+      console.log(`Deezer: Searching for "${query}"`);
+      const result = (await this.api.request('GET', `search/track?q=${query}`, false)) as DeezerTrack[];
+      const tracks = result.map((track) => {
+         return new Track({
+            id: String(track.id),
+            name: track.title,
+            source: 'deezer',
+            url: track.link || '',
+            icon: track.album.cover_xl,
+            artist: {
+               id: String(track.artist.id),
+               name: track.artist.name,
+               icon: track.artist.picture_xl,
+               url: track.artist.link,
+            },
+            album: {
+               id: String(track.album.id),
+               name: track.album.title,
+               icon: track.album.cover_xl,
+            },
+            duration: track.duration * 1000,
+            explicit: !!track.explicit_content_lyrics,
+         });
+      });
+      console.log(`Deezer: Found ${tracks.length} tracks for query "${query}"`);
+   }
+
    async buildRadiosPlaylists(genres: number[]): Promise<RadioPlaylist[] | undefined> {
       if (!genres.length) return;
       const lists = await Promise.all(
@@ -42,14 +68,14 @@ export default class Deezer {
             genre: {
                name: radio.genre.name,
                id: radio.genre.id,
-               icon: radio.genre.picture_medium,
+               icon: radio.genre.picture_xl,
             },
             playlists: radio.playlists.map((list) => {
                return {
                   name: list.title,
                   description: list.description,
                   id: list.id,
-                  icon: list.picture_medium,
+                  icon: list.picture_xl,
                };
             }),
          };
@@ -65,17 +91,18 @@ export default class Deezer {
             name: track.title,
             source: 'deezer',
             url: track.link || '',
-            icon: track.album.cover_medium,
+            icon: track.album.cover_xl,
+            requester: track.md5_image,
             artist: {
                id: String(track.artist.id),
                name: track.artist.name,
-               icon: track.artist.picture_medium,
+               icon: track.artist.picture_xl,
                url: track.artist.link,
             },
             album: {
                id: String(track.album.id),
                name: track.album.title,
-               icon: track.album.cover_medium,
+               icon: track.album.cover_xl,
             },
             duration: track.duration * 1000,
             explicit: !!track.explicit_content_lyrics,

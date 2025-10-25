@@ -1,5 +1,5 @@
 import Bot from '../core/Bot.js';
-import { Track } from './Media.js';
+import { Track } from '../models/Track.js';
 
 import { Stream } from 'node:stream';
 
@@ -13,7 +13,7 @@ import fluent from 'fluent-ffmpeg';
 import Queue from './Queue.js';
 import logger from '../utils/logger.js';
 import EventEmitter from 'node:events';
-import Cache from './Cache.js';
+import Cache from '../services/Cache.js';
 import Radio from './Radio.js';
 import Player from './Player.js';
 
@@ -82,22 +82,24 @@ export default class Playback extends EventEmitter {
       if (!data) throw new Error('Track not found!');
 
       const cached = await this.cache.getTrackData(data);
-      if (cached?.source === 'spotify' || cached?.source === 'deezer') cached.source = 'cache';
       if (cached) return cached;
 
-      const existing = this.queue.tracks.get(data.id);
-      if (existing) if (existing.metadata?.id) return existing;
+      if (data.metadata?.id) return data;
 
-      const query = `${data.name} · ${data.artist.name} Official Audio`;
+      const query = `${data.artist.name} · ${data.name} Official Audio`;
       const result = await this.client.search.youtube.search(query);
       if (!result) throw new Error('No search results found');
 
-      return new Track({
+      const dated = new Track({
          ...data,
          metadata: {
             ...result,
          },
       });
+
+      const cache = await this.cache.getTrackData(dated);
+      if (cache) return cache;
+      return dated;
    }
 
    public async getAudioStream(track: Track, seek: number = 0) {
@@ -106,22 +108,23 @@ export default class Playback extends EventEmitter {
       stream.on('data', (chunk) => chunks.push(chunk));
 
       if (track.cached) {
-         if (!track.streamable) {
-            stream.destroy(new Error('Track is cached but has no streamable URL.'));
-            return;
-         }
-         const streamable = await this.cache.getAudioStream(track.streamable);
-         if (streamable) streamable.pipe(stream);
-         else {
-            stream.destroy(new Error('Failed to create Stream from Cache.'));
-            return;
+         if (track.streamable) {
+            const streamable = await this.cache.getAudioStream(track.streamable);
+            if (streamable) streamable.pipe(stream);
+            else {
+               stream.destroy(new Error('Failed to create Stream from Cache.'));
+               return; // TODO: handle this case properly
+            }
+         } else {
+            stream.destroy(new Error('Track is marked as cached but has no streamable ID.'));
+            return; // TODO: handle this case properly
          }
       } else if (track.metadata?.url) {
          const streamable = await this.client.search.youtube.getAudioStream(track.metadata.url);
          if (streamable) streamable.pipe(stream);
          else {
             stream.destroy(new Error('Failed to create Stream from YouTube.'));
-            return;
+            return; // TODO: handle this case properly
          }
       }
 

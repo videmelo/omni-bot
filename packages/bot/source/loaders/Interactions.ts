@@ -3,7 +3,7 @@ import * as Discord from 'discord.js';
 import Bot from '../core/Bot.js';
 import logger from '../utils/logger.js';
 import Embed from '../utils/embed.js';
-import Interaction from '../handlers/Interaction.js';
+import Interaction from '../base/Interaction.js';
 
 export default class Interactions {
    client: Bot;
@@ -87,8 +87,7 @@ export default class Interactions {
          }
 
          try {
-            if (!interaction.appPermissions.has([Discord.PermissionFlagsBits.SendMessages, Discord.PermissionFlagsBits.ViewChannel]))
-               throw new Error('No prmissions!');
+            if (!interaction.appPermissions.has([Discord.PermissionFlagsBits.SendMessages, Discord.PermissionFlagsBits.ViewChannel])) throw new Error('No prmissions!');
             await command.execute({ client: this.client, context });
          } catch (error: any) {
             logger.error(`Error executing ${interaction.commandName}:`, error);

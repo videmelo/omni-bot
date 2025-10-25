@@ -2,20 +2,21 @@ import 'dotenv/config';
 
 import { Client, Collection, GatewayIntentBits, VoiceBasedChannel, TextBasedChannel } from 'discord.js';
 
-import Interactions from '../modules/Interactions.js';
-import Events from '../modules/Events.js';
+import Interactions from '../loaders/Interactions.js';
+import Events from '../loaders/Events.js';
 import fs from 'node:fs/promises';
 
 import { api, io, server } from '../api/index.js';
 import logger from '../utils/logger.js';
 import Verify from '../utils/errors.js';
-import Player from '../handlers/Player.js';
-import Search from '../handlers/Search.js';
+import Player from '../player/Player.js';
+import Search from '../services/Search.js';
 import Embed from '../utils/embed.js';
 import Button from '../utils/button.js';
-import Radio from '../handlers/Radio.js';
-import { RadioPlaylist } from '../handlers/Deezer.js';
-import { Track } from '../handlers/Media.js';
+import Radio from '../player/Radio.js';
+import { RadioPlaylist } from '../services/Deezer.js';
+import { Track } from '../models/Track.js';
+import RegisterSocketHandlers from '../api/sockets/index.js';
 
 export default class Bot extends Client {
    config: {
@@ -40,13 +41,7 @@ export default class Bot extends Client {
 
    constructor() {
       super({
-         intents: [
-            GatewayIntentBits.Guilds,
-            GatewayIntentBits.MessageContent,
-            GatewayIntentBits.GuildMessages,
-            GatewayIntentBits.GuildVoiceStates,
-            GatewayIntentBits.GuildMembers,
-         ],
+         intents: [GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMembers],
       });
 
       this.config = {
@@ -67,14 +62,17 @@ export default class Bot extends Client {
       this.embed = new Embed();
       this.button = new Button();
       this.events = new Events(this);
-      this.search = new Search(this);
+      this.search = new Search({
+         spotify: {
+            id: this.config.spotify.id,
+            secret: this.config.spotify.secret,
+         },
+      });
       this.socket = io;
    }
 
    async initGuildPlayer(voice: VoiceBasedChannel, channel?: TextBasedChannel) {
       if (!voice) return null;
-      const existing = this.getGuildPlayback(voice.id);
-      if (existing?.isRadio()) existing.connections.get(voice.id)?.destroy();
 
       const player = new Player(this, {
          voice: voice.id,
@@ -153,6 +151,10 @@ export default class Bot extends Client {
          const result = await super.login(key);
          server.listen(this.config.port, () => {
             logger.done(`Server is running on port: ${this.config.port}`);
+         });
+
+         io.on('connection', (socket) => {
+            RegisterSocketHandlers(socket, this);
          });
 
          return result;

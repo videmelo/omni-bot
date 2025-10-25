@@ -1,5 +1,6 @@
 import { Collection } from 'discord.js';
-import { Playlist, Track } from './Media.js';
+import { Track } from '../models/Track.js';
+import { Playlist } from '../models/Playlist.js';
 import Player from './Player.js';
 import Radio from './Radio.js';
 import { it } from 'node:test';
