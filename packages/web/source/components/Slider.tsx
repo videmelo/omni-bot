@@ -100,18 +100,9 @@ const Slider = ({
    return (
       <div className="w-full group">
          <div className="flex flex-col items-center text-xs text-gray-400 font-medium">
-            <div
-               ref={sliderRef}
-               className="relative w-full h-4 cursor-pointer"
-               onMouseDown={handleMouseDown}
-            >
-               <div
-                  className={`absolute w-full h-1 ${trackColor} rounded-full top-1/2 -translate-y-1/2`}
-               />
-               <div
-                  className={`absolute h-1 ${progressColor} rounded-full top-1/2 -translate-y-1/2`}
-                  style={{ width: `${progress}%` }}
-               />
+            <div ref={sliderRef} className="relative w-full h-4 cursor-pointer" onMouseDown={handleMouseDown}>
+               <div className={`absolute w-full h-1 ${trackColor} rounded-full top-1/2 -translate-y-1/2`} />
+               <div className={`absolute h-1 ${progressColor} rounded-full top-1/2 -translate-y-1/2`} style={{ width: `${progress}%` }} />
                <div
                   className={`
               absolute top-1/2 -translate-y-1/2 h-3 w-3 ${thumbColor} rounded-full shadow-lg
@@ -128,12 +119,8 @@ const Slider = ({
 
             {showTimers && (
                <div className="flex w-full justify-between">
-                  <span className="select-none w-12">
-                     {formatTime((progress / 100) * duration)}
-                  </span>
-                  <span className="select-none w-12 text-right">
-                     -{formatTime(Math.max(0, duration - (progress / 100) * duration))}
-                  </span>
+                  <span className="select-none w-12">{formatTime((progress / 100) * duration)}</span>
+                  <span className="select-none w-12 text-right">-{formatTime(Math.max(0, duration - (progress / 100) * duration))}</span>
                </div>
             )}
          </div>

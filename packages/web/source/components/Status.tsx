@@ -15,7 +15,7 @@ interface StatusItem {
 }
 
 interface StatusProps {
-   status: StatusItem | null
+   status: StatusItem | null;
    styles?: string;
    visible?: string;
    hidden?: string;
@@ -54,9 +54,7 @@ function Status({ status, styles = '', visible = '', hidden = '' }: StatusProps)
          let updatedQueue = [...prevQueue];
 
          if (newStatus.respond) {
-            const targetIndex = updatedQueue.findIndex(
-               (item) => item.async === newStatus.respond
-            );
+            const targetIndex = updatedQueue.findIndex((item) => item.async === newStatus.respond);
 
             if (targetIndex > -1) {
                const target = updatedQueue[targetIndex];
@@ -129,9 +127,7 @@ function Status({ status, styles = '', visible = '', hidden = '' }: StatusProps)
       const timerDuration = Math.max(3000, minDisplayTime);
 
       const exitTimer = setTimeout(() => {
-         setQueue((prev) =>
-            prev.map((item) => (item.id === status.id ? { ...item, isExiting: true } : item))
-         );
+         setQueue((prev) => prev.map((item) => (item.id === status.id ? { ...item, isExiting: true } : item)));
 
          const removalTimer = setTimeout(() => {
             setQueue((prev) => prev.filter((item) => item.id !== status.id));
@@ -187,23 +183,11 @@ function Status({ status, styles = '', visible = '', hidden = '' }: StatusProps)
             <div
                key={item.id}
                className={`w-max rounded-full p-2 flex justify-center gap-3 items-center ease-in duration-500
-            ${
-               item.type === 'error'
-                  ? 'bg-red-600'
-                  : item.type === 'warn'
-                    ? 'bg-yellow-600'
-                    : item.type === 'async'
-                      ? 'bg-blue-600'
-                      : item.type === 'done'
-                        ? 'bg-green-600'
-                        : 'bg-gray-600'
-            }
+            ${item.type === 'error' ? 'bg-red-600' : item.type === 'warn' ? 'bg-yellow-600' : item.type === 'async' ? 'bg-blue-600' : item.type === 'done' ? 'bg-green-600' : 'bg-gray-600'}
             ${item.isExiting ? hidden : visible}`}
             >
                <Omni />
-               <div className="text-sm text-white text-opacity-80 flex flex-wrap items-center">
-                  {processMessage(item.message)}
-               </div>
+               <div className="text-sm text-white text-opacity-80 flex flex-wrap items-center">{processMessage(item.message)}</div>
                {item.type === 'async' && (
                   <div className="bg-white bg-opacity-10 rounded-full px-3">
                      <Loading className="w-6 h-6" />

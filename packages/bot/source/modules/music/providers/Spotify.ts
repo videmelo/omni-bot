@@ -1,6 +1,7 @@
 import SpotifyWebApi from 'spotify-web-api-node';
 import Logger from '../../../utils/logger.js';
 import axios from 'axios';
+import { SearchResult } from '../Search.js';
 
 interface SpotifyConfig {
    id: string;
@@ -14,7 +15,6 @@ interface SpotifySearchOptions {
    limit?: number;
    offset?: number;
    market?: string;
-   include_external?: 'audio';
    [key: string]: any;
 }
 
@@ -68,7 +68,6 @@ interface SpotifyArtist {
    query?: string;
 }
 
-type SpotifySearchResultType = 'tracks' | 'albums' | 'playlists' | 'artists';
 interface SpotifySearchResult {
    type: SpotifySearchType | 'top' | 'search';
    items: {
@@ -132,7 +131,7 @@ export class Spotify {
       throw new Error('Maximum number of retry attempts reached.');
    }
 
-   async search(query: string, options: SpotifySearchOptions = { types: ['track'] }): Promise<SpotifySearchResult> {
+   async search(query: string, options: SpotifySearchOptions = { types: ['track'] }): Promise<SearchResult> {
       if (this.urls.pattern.test(query)) {
          return await this.resolve(query);
       } else {
@@ -175,7 +174,7 @@ export class Spotify {
       }
    }
 
-   async resolve(url: string): Promise<SpotifySearchResult> {
+   async resolve(url: string): Promise<SearchResult> {
       const match = this.urls.pattern.exec(url);
       if (!match) {
          throw new Error('Invalid Spotify URL: ' + url);

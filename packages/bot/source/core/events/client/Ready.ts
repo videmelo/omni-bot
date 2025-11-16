@@ -18,7 +18,7 @@ export default class ClientReady extends Event {
 
       logger.info(`Ready! Logged in as: ${event.user!.username}`);
 
-      // await client.buildRadios();
-      client.initRadios();
+      // await client.radios.build();
+      client.radios.init();
    }
 }

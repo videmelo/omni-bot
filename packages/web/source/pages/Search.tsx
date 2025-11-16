@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import ItemList from '../components/ItemList.js';
+import Section from '../components/Section.js';
 import socket from '../services/socket.js';
 import Play from '../assets/icons/Play.js';
 
@@ -21,7 +21,7 @@ type Album = {
 
 type Track = {
    id: string;
-   name: string;
+   name: string;  
    icon?: string;
    artist: Artist;
    type: 'track';
@@ -44,8 +44,6 @@ type SearchResult = {
       top: TopResult;
    };
 };
-
-// --- Skeleton Components ---
 
 const SkeletonTopResult = () => (
    <div className="flex overflow-x-auto scrollbar-none gap-3 bg-black bg-opacity-40 rounded-2xl animate-pulse">
@@ -121,9 +119,9 @@ export default function Page() {
                </div>
             </div>
             <div className="flex flex-col gap-5">
-               <ItemList />
-               <ItemList />
-               <ItemList />
+               <Section />
+               <Section />
+               <Section />
             </div>
          </main>
       );
@@ -183,19 +181,19 @@ export default function Page() {
          )}
 
          <div className="flex flex-col gap-5">
-            {tracks.length > 0 && (
-               <ItemList
+            {tracks.length > 0 ? (
+               <Section
                   data={tracks}
                   title="Tracks"
                   onClick={(event: React.MouseEvent, item: Track) => handleItemClick(item)}
-                  newTrack={(event: React.MouseEvent, track: Track) => {
+                  onAppend={(event: React.MouseEvent, track: Track) => {
                      event.stopPropagation();
                      socket.emit('queue:new', track);
                   }}
                />
-            )}
-            {albums.length > 0 && <ItemList data={albums} title="Albums" />}
-            {artists.length > 0 && <ItemList data={artists} title="Artists" />}
+            ) : null}
+            {albums.length > 0 ? <Section data={albums} title="Albums"/> : null}
+            {artists.length > 0 ? <Section data={artists} title="Artists" rounded/> : null}
          </div>
       </main>
    );

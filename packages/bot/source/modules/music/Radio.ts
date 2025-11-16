@@ -81,7 +81,7 @@ export class Radio extends Playback {
                playback.connections.delete(guild);
             }
          } else if (playback.isPlayer()) {
-            this.client.destroyGuildPlayer(playback.guild);
+            this.client.players.destroy(playback.guild);
          }
       }
 

@@ -41,11 +41,7 @@ const Sidebar = () => {
             })}
             {user.avatar ? (
                <div className="relative flex ml-[5px] group cursor-pointer mt-auto">
-                  <img
-                     className="rounded-full w-[50px] h-[50px]"
-                     src={`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`}
-                     alt="avatar"
-                  />
+                  <img className="rounded-full w-[50px] h-[50px]" src={`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`} alt="avatar" />
                   <span className="p-2 block"></span>
                   <button
                      onClick={() => {

@@ -9,3 +9,5 @@ export * from './Search.js';
 export * from './providers/Spotify.js';
 export * from './providers/Youtube.js';
 export * from './providers/Deezer.js';
+export * from './managers/PlayerManager.js';
+export * from './managers/RadioManager.js';

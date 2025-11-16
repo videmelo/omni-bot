@@ -44,8 +44,8 @@ export default class Events {
             })
          );
 
-         const player = this.client.players.set.bind(this.client.players);
-         this.client.players.set = (key, event) => {
+         const player = this.client.players.list.set.bind(this.client.players.list);
+         this.client.players.list.set = (key, event) => {
             const result = player(key, event);
             this.list.forEach(({ name, handler }) => {
                event.on(name, handler);

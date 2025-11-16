@@ -23,7 +23,7 @@ export default class Stop extends Interaction {
          if (client.verify.isEmptyQueue(context)) return;
          if (client.verify.isNotPlaying(context, player)) return;
 
-         client.destroyGuildPlayer(context.guild.id);
+         client.players.destroy(context.guild.id);
          context.noReply();
       } catch (err: any) {
          throw new Error(err);

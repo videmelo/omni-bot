@@ -88,7 +88,7 @@ export class Player extends Playback {
    public destroy() {
       if (!this.connection) return;
       this.connection.destroy();
-      this.client.players.delete(this.guild);
+      this.client.players.list.delete(this.guild);
    }
 
    public async play(

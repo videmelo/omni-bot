@@ -10,7 +10,7 @@ export default class QueueEnd extends Event {
 
    async execute(client: Bot, player: Player) {
       setTimeout(() => {
-         if (!player.playing) return client.destroyGuildPlayer(player.guild);
+         if (!player.playing) return client.players.destroy(player.guild);
       }, 180000);
 
       if (!player.channel) return;

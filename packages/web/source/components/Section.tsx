@@ -1,6 +1,9 @@
+import { useNavigate } from 'react-router-dom';
 import Plus from '../assets/icons/Plus.js';
 
-export default function ItemList({ data, onClick, newTrack }: any) {
+export default function Section({ title = 'Undefined', data, onClick, onAppend, rounded }: any) {
+   const navigate = useNavigate();
+
    if (!data?.length)
       return (
          <div className="flex flex-col gap-5">
@@ -29,9 +32,12 @@ export default function ItemList({ data, onClick, newTrack }: any) {
          </div>
       );
    return (
-      <div className="flex flex-col gap-5">
+      <section className="flex flex-col gap-5">
          <div className="flex flex-col w-full flex-grow">
-            <div className="flex items-center shrink-0 font-medium text-2xl text capitalize">{`${data[0].type}s`}</div>
+            <div className="flex justify-between items-center">
+               <div className="flex items-center shrink-0 font-medium text-2xl text capitalize">{title}</div>
+               <span className="font-poppins cursor-pointer hover:underline font-light opacity-60">Show All</span>
+            </div>
             <div
                className="overflow-x-auto -mx-6 scrollbar-none"
                style={{
@@ -39,22 +45,22 @@ export default function ItemList({ data, onClick, newTrack }: any) {
                   maskImage: 'linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 1) 5%, rgba(0, 0, 0, 1) 95%, rgba(0, 0, 0, 0))',
                }}
             >
-               <ul className="flex gap-1 mt-2 scrollbar-none flex-grow">
+               <ul className="flex mt-2 scrollbar-none flex-grow">
                   {data.map((item: any, index: number) => (
                      <li
                         key={item.id}
-                        className="flex flex-col gap-1 first:ml-6 last:mr-6 hover:bg-white hover:bg-opacity-5 p-4 rounded-md"
+                        className="flex cursor-pointer flex-col gap-1 first:ml-6 last:mr-6 hover:bg-white hover:bg-opacity-5 p-4 rounded-md"
                         onClick={(event) => (onClick ? onClick(event, data[index]) : null)}
                      >
                         <div className="group flex flex-col items-end">
                            <img
                               src={item?.icon || item?.icon}
-                              className={`h-[140px] w-[140px] object-cover ${item.type === 'artist' ? 'rounded-full' : 'rounded-md'}`}
+                              className={`h-[140px] w-[140px] object-cover ${rounded ? 'rounded-full' : 'rounded-md'}`}
                            />
-                           {item.type == 'track' ? (
+                           {onAppend ? (
                               <button
-                                 className="p-2 opacity-0 cursor-pointer -mt-[46px] hover:bg-opacity-100 mr-[5px] group-hover:opacity-100 group-hover:bg-black w-[41px] h-[41px] inline-block group-hover:bg-opacity-70 rounded-md"
-                                 onClick={(event) => (newTrack ? newTrack(event, data[index]) : null)}
+                                 className="p-2 opacity-0 cursor-pointer hover:scale-[1.03] -mt-[46px] hover:bg-opacity-100 mr-[5px] group-hover:opacity-100 group-hover:bg-black w-[41px] h-[41px] inline-block group-hover:bg-opacity-70 rounded-md"
+                                 onClick={(event) => onAppend(event, data[index])}
                               >
                                  <Plus className="w-7 h-7" />
                               </button>
@@ -71,6 +77,6 @@ export default function ItemList({ data, onClick, newTrack }: any) {
                </ul>
             </div>
          </div>
-      </div>
+      </section>
    );
 }

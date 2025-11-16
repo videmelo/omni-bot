@@ -3,7 +3,7 @@ import { Track, Deezer, Spotify, YouTube, Playlist } from './index.js';
 
 type SearchType = 'track' | 'top' | 'url';
 
-interface SearchResult {
+export interface SearchResult {
    type: 'track' | 'album' | 'playlist' | 'artist' | 'search' | 'top';
    items: {
       tracks?: Track[];
@@ -52,13 +52,13 @@ export class Search {
 
       switch (options.type) {
          case 'track': {
-            const result = await this.spotify.search(query, {
+            const result = await this.engine.search(query, {
                types: ['track'],
                limit: options.limit,
             });
             let search: SearchResult = {
                type: 'track',
-               items: { tracks: result.items.tracks.map((t) => new Track(t)) },
+               items: { tracks: result.items?.tracks?.map((t) => new Track(t)) ?? [] },
             };
             this.encache(query, search);
             return search;

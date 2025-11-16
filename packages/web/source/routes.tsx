@@ -11,6 +11,7 @@ import Queue from './pages/Queue.js';
 import socket from './services/socket.js';
 import { useAuth } from './contexts/AuthContext.jsx';
 import Scout from './assets/icons/Scout.js';
+import Collection from './pages/Collection.js';
 
 function RedirectRoute() {
    const navigate = useNavigate();
@@ -112,6 +113,7 @@ const Routers = () => {
          <Route path="/redirect" element={<RedirectRoute />} />
          <Route path="/" element={isLoading ? <Loading /> : isAuth ? <Layout /> : <Navigate to="/login" replace />}>
             <Route index element={<Home />} />
+            <Route path='/collection/:id' element={<Collection />} />
             <Route path="/search" element={<Search />} />
             <Route path="/queue" element={<Queue />} />
             <Route path="*" element={<Navigate to="/" replace />} />

@@ -17,7 +17,7 @@ export default function GuildSocket(socket: SocketData, client: Bot) {
       const channel = await client.channels.fetch(id);
       if (!channel || !channel.isVoiceBased()) return;
 
-      await client.initGuildPlayer(channel);
+      await client.players.set(channel);
       if (typeof callback === 'function') callback();
    });
 

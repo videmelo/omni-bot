@@ -51,7 +51,7 @@ export default class Play extends Interaction {
          let player = client.getGuildPlayback(context.guild.id);
          if (player) if (client.verify.isRadio(context, player)) return;
 
-         if (!player) player = await client.initGuildPlayer(context.member!.voice.channel!, context.channel!);
+         if (!player) player = await client.players.set(context.member!.voice.channel!, context.channel!);
          if (!player) {
             return await context.replyErro('An error occurred while initializing the guild player!');
          }

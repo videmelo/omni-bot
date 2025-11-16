@@ -102,14 +102,14 @@ function Player() {
    function updatePlayer() {
       socket.emit('queue:get', (data: any) => {
          if (!data) return dispatch({ type: 'RESET' });
-         console.log(data)
+         console.log(data);
 
          dispatch({ type: 'SET_QUEUE', payload: data.list });
          dispatch({ type: 'SET_TRACK', payload: { ...data.current, duration: data.current?.duration || 0 } });
          dispatch({ type: 'SET_COVER', payload: data.current?.icon });
          dispatch({ type: 'SET_REPEAT', payload: data.repeat });
          dispatch({ type: 'SET_SHUFFLED', payload: data.shuffled });
-         dispatch({ type: 'SET_NEXT', payload: data.next })
+         dispatch({ type: 'SET_NEXT', payload: data.next });
 
          handlePalette(data.current?.icon);
       });
@@ -193,13 +193,8 @@ function Player() {
    if (!state || !track || !palette || !cover) return null;
    return (
       <div className={`flex min-w-[400px] max-w-[400px] flex-col gap-3 h-full`}>
-         <div
-            className={`relative overflow-auto scrollbar-none h-full flex-col items-center flex rounded-3xl`}
-            style={{ backgroundColor: palette.alpha }}
-         >
-            <div
-               className={`relative w-[400px] h-[400px] duration-700 transi ease-out delay-75 ${location.pathname == '/queue' ? '-mt-[730px]' : ''}`}
-            >
+         <div className={`relative overflow-auto scrollbar-none h-full flex-col items-center flex rounded-3xl`} style={{ backgroundColor: palette.alpha }}>
+            <div className={`relative w-[400px] h-[400px] duration-700 transi ease-out delay-75 ${location.pathname == '/queue' ? '-mt-[730px]' : ''}`}>
                <img src={cover} className="w-[400px] h-[400px] object-cover rounded-t-3xl" />
                <div
                   className="absolute"
@@ -253,21 +248,12 @@ function Player() {
                   <button onClick={() => socket.emit('player:volume', volume >= 10 ? volume - 10 : volume)}>
                      <VolumeLow className="w-[30px] h-[30px] fill-white" />
                   </button>
-                  <Slider
-                     value={volume}
-                     duration={100}
-                     onChange={() => {}}
-                     onCommit={(value: any) => socket.emit('player:volume', value.time)}
-                     showTimers={false}
-                  />
+                  <Slider value={volume} duration={100} onChange={() => {}} onCommit={(value: any) => socket.emit('player:volume', value.time)} showTimers={false} />
                   <button onClick={() => socket.emit('player:volume', volume <= 90 ? volume + 10 : volume)}>
                      <VolumeHigh className="w-[30px] h-[30px] fill-white" />
                   </button>
                </div>
-               <div
-                  className="flax w-full rounded-[20px] px-6 py-4 justify-center gap-10 items-center"
-                  style={{ backgroundColor: palette.LightVibrant.hex }}
-               >
+               <div className="flax w-full rounded-[20px] px-6 py-4 justify-center gap-10 items-center" style={{ backgroundColor: palette.LightVibrant.hex }}>
                   <div className="font-medium uppercase text-sm text-black text-opacity-50">Playing From Party</div>
                   <div className="flex items-center gap-2">
                      <Headphone className="w-6 h-6 text-black text-opacity-80" />

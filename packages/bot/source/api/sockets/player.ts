@@ -44,7 +44,7 @@ export default function PlayerSocket(socket: SocketData, client: Bot) {
       }
 
       if (!player) {
-         const playback = await client.initGuildPlayer(voice);
+         const playback = await client.players.set(voice);
          if (playback) {
             player = playback;
          } else {

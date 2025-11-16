@@ -36,7 +36,7 @@ export default class Broadcast extends Interaction {
 
       for (const voice of voices) {
          const channel = (await client.channels.cache.get(voice)) as VoiceBasedChannel;
-         const player = await client.initGuildPlayer(channel);
+         const player = await client.players.set(channel);
          if (!player) return await context.replyErro('Failed to initialize player for broadcast!');
          player.queue.new(search.items.tracks[0]);
          player.queue.shuffle();
