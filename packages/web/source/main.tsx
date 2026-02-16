@@ -1,4 +1,3 @@
-import React from 'react';
 import ReactDOM from 'react-dom/client';
 
 import { Routers, Router } from './routes.js';
@@ -12,11 +11,11 @@ const container = document.getElementById('root')!;
 const root = ReactDOM.createRoot(container);
 
 root.render(
-   <AuthProvider>
-      <PlayerProvider>
-         <Router>
-            <Routers />
-         </Router>
-      </PlayerProvider>
-   </AuthProvider>
+  <AuthProvider>
+    <PlayerProvider>
+      <Router>
+        <Routers />
+      </Router>
+    </PlayerProvider>
+  </AuthProvider>,
 );

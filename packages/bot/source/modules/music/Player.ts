@@ -7,169 +7,171 @@ import logger from '../../utils/logger.js';
 import { Playback } from './Playback.js';
 
 interface PlayerOptions {
-   voice: string;
-   guild: string;
-   channel?: string;
-   volume?: number;
-   autoplay?: boolean;
-   autoleave?: boolean;
+  voice: string;
+  guild: string;
+  channel?: string;
+  volume?: number;
+  autoplay?: boolean;
+  autoleave?: boolean;
 }
 
 export class Player extends Playback {
-   public voice: string;
-   public guild: string;
-   public channel?: string;
+  public voice: string;
+  public guild: string;
+  public channel?: string;
 
-   constructor(client: Bot, { guild, voice, channel, volume, autoplay, autoleave }: PlayerOptions) {
-      super(client, guild, { autoplay, autoleave });
-      this.guild = guild;
-      this.voice = voice;
-      this.channel = channel;
-   }
+  constructor(client: Bot, { guild, voice, channel, autoplay, autoleave }: PlayerOptions) {
+    super(client, guild, { autoplay, autoleave });
+    this.guild = guild;
+    this.voice = voice;
+    this.channel = channel;
+  }
 
-   public socket() {
-      this.client.socket.to(this.guild).emit('player:update');
-   }
+  public socket() {
+    this.client.socket.to(this.guild).emit('player:update');
+  }
 
-   public async connect(channel: string) {
-      try {
-         const voice = await this.client.channels.fetch(channel);
-         if (!voice?.isVoiceBased()) throw new Error('Invalid VoiceChannel');
+  public async connect(channel: string) {
+    try {
+      const voice = await this.client.channels.fetch(channel);
+      if (!voice?.isVoiceBased()) throw new Error('Invalid VoiceChannel');
 
-         const existing = this.client.getGuildPlayback(voice.id);
-         if (existing?.isRadio()) existing.connections.get(voice.id)?.destroy();
-         else if (existing?.isPlayer()) if (existing.connection) existing.destroy();
+      const existing = this.client.getGuildPlayback(voice.id);
+      if (existing?.isRadio()) existing.connections.get(voice.id)?.destroy();
+      else if (existing?.isPlayer()) if (existing.connection) existing.destroy();
 
-         this.connection = Voice.joinVoiceChannel({
-            channelId: voice.id,
-            guildId: voice.guild.id,
-            adapterCreator: voice.guild.voiceAdapterCreator,
-         });
-         this.voice = voice.id;
+      this.connection = Voice.joinVoiceChannel({
+        channelId: voice.id,
+        guildId: voice.guild.id,
+        adapterCreator: voice.guild.voiceAdapterCreator,
+      });
+      this.voice = voice.id;
 
-         this.metadata = {
-            voice,
-         };
+      this.metadata = {
+        voice,
+      };
 
-         this.audioplayer = Voice.createAudioPlayer({
-            behaviors: { noSubscriber: Voice.NoSubscriberBehavior.Play },
-         });
-         this.audioplayer
-            .on(Voice.AudioPlayerStatus.Playing, () => {
-               this.playing = true;
-               this.paused = false;
-               this.emit('nowPlaying', this, this.current);
-               this.socket();
-            })
-            .on(Voice.AudioPlayerStatus.Idle, () => {
-               this.playing = false;
-               this.socket();
+      this.audioplayer = Voice.createAudioPlayer({
+        behaviors: { noSubscriber: Voice.NoSubscriberBehavior.Play },
+      });
+      this.audioplayer
+        .on(Voice.AudioPlayerStatus.Playing, () => {
+          this.playing = true;
+          this.paused = false;
+          this.emit('nowPlaying', this, this.current);
+          this.socket();
+        })
+        .on(Voice.AudioPlayerStatus.Idle, () => {
+          this.playing = false;
+          this.socket();
 
-               const next = this.queue.next();
-               if (!next) return this.emit('queueEnd', this);
-               this.socket();
-               this.play(next);
-            })
-            .on(Voice.AudioPlayerStatus.Buffering, () => {
-               this.playing = false;
-            });
-         this.socket();
-      } catch (error: any) {
-         logger.error(error);
-      }
-   }
-
-   public disconnect() {
-      if (!this.connection) return;
-      this.connection.destroy();
+          const next = this.queue.next();
+          if (!next) return this.emit('queueEnd', this);
+          this.socket();
+          void this.play(next);
+        })
+        .on(Voice.AudioPlayerStatus.Buffering, () => {
+          this.playing = false;
+        });
       this.socket();
-   }
+    } catch (error: unknown) {
+      logger.error('Error while initiating playback', error);
+    }
+  }
 
-   public destroy() {
-      if (!this.connection) return;
-      this.connection.destroy();
-      this.client.players.list.delete(this.guild);
-   }
+  public disconnect() {
+    if (!this.connection) return;
+    this.connection.destroy();
+    this.socket();
+  }
 
-   public async play(
-      track: Track,
-      metadata: { seek?: number; force?: boolean; requester?: string } = {
-         seek: 0,
-         force: false,
+  public destroy() {
+    if (!this.connection) return;
+    this.connection.destroy();
+    this.client.players.list.delete(this.guild);
+  }
+
+  public async play(
+    track: Track,
+    metadata: { seek?: number; force?: boolean; requester?: string } = {
+      seek: 0,
+      force: false,
+    },
+  ): Promise<Track | undefined> {
+
+    try {
+      if (!(track instanceof Track)) throw new Error('Track is not a Track!');
+      if (!this.audioplayer || !this.connection) throw new Error('Player not initied');
+      if (this.buffering) return;
+
+      track = await this.handleTrackData(track);
+      if (this.playing || this.queue.tracks.size === 0) track = this.queue.new(track, metadata)!;
+      if (this.playing) if (!metadata.seek && !metadata.force) return track;
+
+      this.buffering = true;
+
+      const stream = await this.getAudioStream(track, metadata.seek);
+      if (!stream) {
+        this.buffering = false;
+        return;
       }
-   ): Promise<Track | undefined> {
-      this.client.search.deezer.search(`${track.artist.name} ${track.name}`);
-      try {
-         if (!(track instanceof Track)) throw new Error('Track is not a Track!');
-         if (!this.audioplayer || !this.connection) throw new Error('Player not initied');
-         if (this.buffering) return;
 
-         track = await this.handleTrackData(track);
-         if (this.playing || this.queue.tracks.size === 0) track = this.queue.new(track, metadata)!;
-         if (this.playing) if (!metadata.seek && !metadata.force) return track;
+      this.audioresource = Voice.createAudioResource(stream.opus, {
+        inlineVolume: true,
+        inputType: Voice.StreamType.OggOpus,
+        metadata: track,
+      });
 
-         this.buffering = true;
+      this.audioresource.volume?.setVolume(this.volume ? this.volume / 100 : 1);
 
-         const stream = await this.getAudioStream(track, metadata.seek);
-         if (!stream) {
-            this.buffering = false;
-            return;
-         }
+      if (this.playing) this.stopAudioPlayer();
+      this.audioplayer.play(this.audioresource);
+      this.connection.subscribe(this.audioplayer);
+      this.current = track;
 
-         this.audioresource = Voice.createAudioResource(stream.opus, {
-            inlineVolume: true,
-            inputType: Voice.StreamType.OggOpus,
-            metadata: track,
-         });
+      if (!track.cached) void this.cache.archive(track, stream.opus, stream.chunks);
+      this.buffering = false;
+      return track;
+    } catch (error: unknown) {
+      logger.error('error', error);
+    }
+  }
 
-         this.audioresource.volume?.setVolume(this.volume ? this.volume / 100 : 1);
+  public async seek(time: number) {
+    if (!this.current) return;
+    await this.play(this.current, { seek: time });
 
-         if (this.playing) this.stopAudioPlayer();
-         this.audioplayer.play(this.audioresource);
-         this.connection.subscribe(this.audioplayer);
-         this.current = track;
+    this.socket();
+  }
 
-         if (!track.cached) this.cache.archive(track, stream.opus, stream.chunks);
-         this.buffering = false;
-         return track;
-      } catch (erro: any) {
-         logger.error('error', erro);
-      }
-   }
-
-   public async seek(time: number) {
-      if (!this.current) return;
-      await this.play(this.current!, { seek: time });
-
+  public pause() {
+    if (this.audioplayer) {
+      this.audioplayer.pause();
+      this.paused = true;
       this.socket();
-   }
+    } else {
+      logger.warn('Audio player is not initialized.');
+    }
+  }
 
-   public pause() {
-      if (this.audioplayer) {
-         this.audioplayer.pause();
-         this.paused = true;
-         this.socket();
-      } else {
-         logger.warn('Audio player is not initialized.');
-      }
-   }
+  public resume() {
+    if (this.audioplayer) {
+      this.audioplayer.unpause();
+      this.paused = false;
+      this.socket();
+    } else {
+      logger.warn('Audio player is not initialized.');
+    }
+  }
 
-   public resume() {
-      if (this.audioplayer) {
-         this.audioplayer.unpause();
-         this.paused = false;
-         this.socket();
-      } else {
-         logger.warn('Audio player is not initialized.');
-      }
-   }
+  public setVoiceChannel(id: string) {
+    this.voice = id;
+  }
+  public setTextChannel(id: string) {
+    this.channel = id;
+  }
 
-   public setVoiceChannel(id: string) {}
-   public setTextChannel(id: string) {
-      this.channel = id;
-   }
-
-   public isPlayer(): this is Player {
-      return true;
-   }
+  public isPlayer(): this is Player {
+    return true;
+  }
 }

@@ -1,32 +1,48 @@
 {
-   "name": "omni",
-   "description": "A Discord Music Bot!",
-   "version": "1.0.0",
-   "main": "index.ts",
-   "author": "VideMelo",
-   "repository": "https://github.com/VideMelo/omni",
-   "keywords": [
-      "discord",
-      "music-bot",
-      "discord-bot"
-   ],
-   "license": "MIT",
-   "workspaces": [
-      "packages/web",
-      "packages/bot"
-   ],
-   "pnpm": {
-      "onlyBuiltDependencies": [
-         "youtube-dl-exec",
-         "ffmpeg-static",
-         "@discordjs/opus"
-      ]
-   },
-   "private": true,
-   "devDependencies": {
-      "@types/node": "^22.15.31",
-      "turbo": "^2.5.4",
-      "typescript": "^5.8.3"
-   },
-   "packageManager": "pnpm@10.22.0"
+  "name": "omni",
+  "description": "A Discord Music Bot!",
+  "version": "1.0.0",
+  "scripts": {
+    "lint": "turbo run lint",
+    "format": "prettier --write .",
+    "dev": "turbo run dev",
+    "build": "turbo run build"
+  },
+  "main": "index.ts",
+  "author": "VideMelo",
+  "repository": "https://github.com/VideMelo/omni",
+  "keywords": [
+    "discord",
+    "music-bot",
+    "discord-bot"
+  ],
+  "license": "MIT",
+  "workspaces": [
+    "packages/shared",
+    "packages/web",
+    "packages/bot"
+  ],
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "youtube-dl-exec",
+      "ffmpeg-static",
+      "@discordjs/opus"
+    ]
+  },
+  "private": true,
+  "devDependencies": {
+    "@types/node": "^22.15.31",
+    "@typescript-eslint/eslint-plugin": "^8.34.0",
+    "@typescript-eslint/parser": "^8.34.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.5.5",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "prettier": "^3.5.3",
+    "turbo": "^2.5.4",
+    "typescript": "^5.8.3"
+  },
+  "packageManager": "pnpm@10.22.0"
 }

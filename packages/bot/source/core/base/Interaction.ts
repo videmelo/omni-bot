@@ -1,32 +1,40 @@
-import Bot from '../Bot.js';
+import type Bot from '../Bot.js';
 import { SlashCommandBuilder } from 'discord.js';
-import Logger from '../../utils/logger.js';
 
-interface InteractionOptions {
-   name: string;
-   description: string;
-   exemple?: string;
-   usage?: string;
-}
-
+// Extend SlashCommandBuilder to inherit methods like addStringOption, setName, etc.
 export default class Interaction extends SlashCommandBuilder {
-   help: { exemple?: string; usage?: string };
-   constructor({ name, description, exemple, usage }: InteractionOptions) {
-      super();
+  public commandName: string;
+  public dm: boolean;
+  public usage?: string;
+  public exemple?: string;
+  public id?: string;
 
-      this.setName(name);
-      this.setDescription(description);
+  constructor({
+    name = '',
+    description = '',
+    commandName = '',
+    dm = false,
+    usage = '',
+    exemple = '',
+  }: {
+    name?: string;
+    description?: string;
+    commandName?: string;
+    dm?: boolean;
+    usage?: string;
+    exemple?: string;
+  } = {}) {
+    super();
+    if (name) this.setName(name);
+    if (description) this.setDescription(description);
+    this.commandName = commandName || name;
+    this.dm = dm;
+    this.usage = usage;
+    this.exemple = exemple;
+  }
 
-      this.help = { exemple, usage };
-   }
-
-   autocomplete(context: any) {
-      Logger.error(`${this.name}.js - An 'autocomplete' method is required`);
-      throw new Error();
-   }
-
-   execute(context: any) {
-      Logger.error(`${this.name}.js - An 'execute' method is required`);
-      throw new Error();
-   }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+  async execute({ client, context }: { client: Bot; context: any }): Promise<any> {
+    // Override me
+  }
 }

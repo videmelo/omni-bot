@@ -1,11 +1,5 @@
 {
-   "extends": "../../tsconfig.base.json",
-   "include": [
-      "source/**/*.ts",
-      "source/**/*.tsx",
-   ],
-   "exclude": [
-      "node_modules",
-      "dist"
-   ]
+  "extends": "../../tsconfig.base.json",
+  "include": ["source/**/*.ts", "source/**/*.tsx"],
+  "exclude": ["node_modules", "dist"]
 }

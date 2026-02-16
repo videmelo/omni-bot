@@ -1,0 +1,58 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "plugins": ["@typescript-eslint"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-type-checked",
+    "prettier"
+  ],
+  "rules": {
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": "error",
+    "@typescript-eslint/no-explicit-any": "error",
+    "no-console": [
+      "warn",
+      {
+        "allow": ["warn", "error"]
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["**/utils/logger.ts", "**/utils/logger.js"],
+      "rules": {
+        "no-console": "off"
+      }
+    },
+    {
+      "files": ["packages/web/**/*.{ts,tsx}"],
+      "plugins": ["react", "react-hooks", "react-refresh"],
+      "extends": ["plugin:react/recommended", "plugin:react-hooks/recommended"],
+      "rules": {
+        "react-refresh/only-export-components": [
+          "warn",
+          {
+            "allowConstantExport": true
+          }
+        ],
+        "react/react-in-jsx-scope": "off"
+      },
+      "settings": {
+        "react": {
+          "version": "detect"
+        }
+      }
+    }
+  ],
+  "env": {
+    "node": true,
+    "es2022": true,
+    "browser": true
+  }
+}

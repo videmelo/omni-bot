@@ -8,22 +8,21 @@
   --font-display: 'Poppins', serif;
 }
 
-
 * {
   box-sizing: border-box;
 }
 
 body {
-   background-color: #000;
-   color: #fff;
-   font-family: 'Rubik', sans-serif;
-   overflow-y: hidden;
+  background-color: #000;
+  color: #fff;
+  font-family: 'Rubik', sans-serif;
+  overflow-y: hidden;
 }
 
 .container-root {
-   display: flex;
-   width: 100%;
-   min-width: 0px;
-   padding: 15px 15px 15px 0;
-   gap: 15px;
+  display: flex;
+  width: 100%;
+  min-width: 0px;
+  padding: 15px 15px 15px 0;
+  gap: 15px;
 }

@@ -1,27 +1,12 @@
-import colors from 'colors';
+import 'colors';
 
-export default class Logger {
-   static info(text: string) {
-      console.log(colors.green('[INFO]'), text);
-   }
-
-   static warn(text: string) {
-      console.log(colors.yellow('[WARN]'), text);
-   }
-
-   static error(text: string, error: string = '') {
-      console.error(colors.red('[ERRO]'), text, error);
-   }
-
-   static async(text: string) {
-      console.log(colors.magenta('[ASYN]'), text);
-   }
-
-   static done(text: string) {
-      console.log(colors.blue('[DONE]'), text);
-   }
-
-   static test(text: string) {
-      console.log(colors.yellow('[TEST]'), text);
-   }
-}
+export default {
+  info: (message: string) => console.log(`[INFO] ${message}`),
+  warn: (message: string) => console.warn(`[WARN] ${message}`),
+  error: (message: string, error?: unknown) => {
+    console.error(`[ERROR] ${message}`);
+    if (error) console.error(error);
+  },
+  done: (message: string) => console.log(`[DONE] ${message}`),
+  async: (message: string) => console.log(`[ASYNC] ${message}`),
+};
